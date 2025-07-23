@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Banking App - Login</title>
+	<link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+	<section>
+		<h1 class="auth-title">🏦 Login / Signup</h1>
+
+		<div class="tab-container" style="max-width: 400px; margin: 0 auto;">
+			<div class="tab-buttons">
+				<button type="button" id="tabLogin" class="active">🔐 Login</button>
+				<button type="button" id="tabSignup">📝 Signup</button>
+			</div>
+
+			<div id="loginTab" class="tab-content">
+				<form id="loginForm">
+					<input type="text" id="loginUsername" placeholder="Username" required />
+					<small id="loginUserError" class="error-message hidden"></small>
+
+					<input type="password" id="loginPassword" placeholder="Password" required />
+					<small id="loginPassError" class="error-message hidden"></small>
+
+					<button id="loginButton" type="submit">Login</button>
+				</form>
+			</div>
+
+			<div id="signupTab" class="tab-content hidden">
+				<form id="signupForm">
+					<input type="text" id="signupUsername" placeholder="Username" required />
+					<small id="signupUserError" class="error-message hidden"></small>
+
+					<input type="password" id="signupPassword" placeholder="Password" required />
+					<small id="signupPassError" class="error-message hidden"></small>
+
+					<button id="signupButton" type="submit">Signup</button>
+				</form>
+			</div>
+		</div>
+	</section>
+
+	<script>
+		document.getElementById('tabLogin').addEventListener('click', () => {
+			document.getElementById('loginTab').classList.remove('hidden');
+			document.getElementById('signupTab').classList.add('hidden');
+			document.getElementById('tabLogin').classList.add('active');
+			document.getElementById('tabSignup').classList.remove('active');
+		});
+
+		document.getElementById('tabSignup').addEventListener('click', () => {
+			document.getElementById('loginTab').classList.add('hidden');
+			document.getElementById('signupTab').classList.remove('hidden');
+			document.getElementById('tabLogin').classList.remove('active');
+			document.getElementById('tabSignup').classList.add('active');
+		});
+
+		document.getElementById('loginForm').addEventListener('submit', async (e) => {
+			e.preventDefault();
+
+			const usernameInput = document.getElementById('loginUsername');
+			const passwordInput = document.getElementById('loginPassword');
+			const userError = document.getElementById('loginUserError');
+			const passError = document.getElementById('loginPassError');
+
+			let valid = true;
+
+			userError.textContent = '';
+			userError.classList.add('hidden');
+			passError.textContent = '';
+			passError.classList.add('hidden');
+			usernameInput.classList.remove('error');
+			passwordInput.classList.remove('error');
+
+			if (!usernameInput.value.trim()) {
+				userError.textContent = 'Username is required.';
+				userError.classList.remove('hidden');
+				usernameInput.classList.add('error');
+				valid = false;
+			}
+
+			if (!passwordInput.value.trim()) {
+				passError.textContent = 'Password is required.';
+				passError.classList.remove('hidden');
+				passwordInput.classList.add('error');
+				valid = false;
+			}
+
+			if (!valid) return;
+
+			const res = await fetch('/auth/login', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username: usernameInput.value, password: passwordInput.value }),
+			});
+
+			const data = await res.json();
+			if (data.token) {
+				localStorage.setItem('token', data.token);
+				location.href = '/dashboard.html';
+			} else {
+				passError.textContent = data.error || 'Login failed.';
+				passError.classList.remove('hidden');
+				passwordInput.classList.add('error');
+			}
+		});
+
+
+		document.getElementById('signupForm').addEventListener('submit', async (e) => {
+			e.preventDefault();
+
+			const usernameInput = document.getElementById('signupUsername');
+			const passwordInput = document.getElementById('signupPassword');
+			const userError = document.getElementById('signupUserError');
+			const passError = document.getElementById('signupPassError');
+
+			let valid = true;
+
+			userError.textContent = '';
+			userError.classList.add('hidden');
+			passError.textContent = '';
+			passError.classList.add('hidden');
+			usernameInput.classList.remove('error');
+			passwordInput.classList.remove('error');
+
+			if (!usernameInput.value.trim()) {
+				userError.textContent = 'Username is required.';
+				userError.classList.remove('hidden');
+				usernameInput.classList.add('error');
+				valid = false;
+			}
+
+			if (!passwordInput.value.trim()) {
+				passError.textContent = 'Password is required.';
+				passError.classList.remove('hidden');
+				passwordInput.classList.add('error');
+				valid = false;
+			} else if (passwordInput.value.length < 4) {
+				passError.textContent = 'Password must be at least 4 characters.';
+				passError.classList.remove('hidden');
+				passwordInput.classList.add('error');
+				valid = false;
+			}
+
+			if (!valid) return;
+
+			const res = await fetch('/auth/signup', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username: usernameInput.value, password: passwordInput.value }),
+			});
+
+			const data = await res.json();
+			if (data.token) {
+				localStorage.setItem('token', data.token);
+				location.href = '/dashboard.html';
+			} else {
+				passError.textContent = data.error || 'Signup failed.';
+				passError.classList.remove('hidden');
+				passwordInput.classList.add('error');
+			}
+		});
+	</script>
+</body>
+
+</html>

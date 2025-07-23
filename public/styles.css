@@ -1,0 +1,225 @@
+/* Global styles */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #e0e6ec;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+section {
+  max-width: 1200px;
+  margin: auto;
+  padding-bottom: 100px;
+}
+
+/* Header layout */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 20px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 1.8em;
+}
+
+.user-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+#userInfo {
+  font-size: 1.1em;
+}
+
+/* Logout button now inline */
+.logout-btn {
+  position: static;
+  width: auto;
+  padding: 8px 16px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #c0392b;
+}
+
+/* Main layout */
+.main-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  margin: 20px auto;
+  padding: 0 20px;
+  max-width: 1200px;
+}
+
+.left-column {
+  flex: 1;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.right {
+  flex: 1;
+  max-width: 500px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.05);
+}
+
+/* Tabs */
+.tab-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tab-buttons button {
+  flex: 1;
+  padding: 10px;
+  background: #5f6a72;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.tab-buttons .active {
+  background: #3498db;
+  color: white;
+}
+
+.tab-content {
+  display: block;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Forms */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input, button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background: #3498db;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background: #2980b9;
+}
+
+/* Pending box */
+.pending-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.05);
+}
+
+/* Lists */
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+ul li {
+  background: #fff;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.05);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .main-grid {
+    flex-direction: column;
+  }
+
+  .left-column, .right {
+    max-width: 100%;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .user-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.empty-message {
+  text-align: center;
+  color: #777;
+  margin-top: 10px;
+  font-style: italic;
+}
+
+.hidden {
+  display: none;
+}
+
+.auth-title {
+  text-align: center;
+  font-size: 2em;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.9em;
+  margin-top: -8px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+input.error {
+  border-color: red;
+}
+
+.hidden {
+  display: none;
+}
