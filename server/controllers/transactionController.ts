@@ -7,11 +7,14 @@ const prisma = new PrismaClient();
 
 export const sendMoney = async (req: AuthRequest, res: Response) => {
   const senderId = req.userId;
-  const { recipientUsername, amount } = req.body;
+  let { recipientUsername, amount } = req.body;
 
-  if (!recipientUsername || typeof amount !== 'number' || amount <= 0) {
+  amount = parseFloat(amount); // ✅ Convert to float
+  if (!recipientUsername || isNaN(amount) || amount <= 0) {
     return res.status(400).json({ error: 'Invalid input' });
   }
+
+  amount = Math.round(amount * 100) / 100; // ✅ Round to 2 decimals
 
   try {
     const sender = await prisma.user.findUnique({ where: { id: senderId } });
@@ -54,11 +57,14 @@ export const sendMoney = async (req: AuthRequest, res: Response) => {
 
 export const requestMoney = async (req: AuthRequest, res: Response) => {
   const fromUserId = req.userId;
-  const { recipientUsername, amount } = req.body;
+  let { recipientUsername, amount } = req.body;
 
-  if (!recipientUsername || typeof amount !== 'number' || amount <= 0) {
+  amount = parseFloat(amount); // ✅ Convert to float
+  if (!recipientUsername || isNaN(amount) || amount <= 0) {
     return res.status(400).json({ error: 'Invalid input' });
   }
+
+  amount = Math.round(amount * 100) / 100; // ✅ Round to 2 decimals
 
   const toUser = await prisma.user.findUnique({ where: { username: recipientUsername } });
   if (!toUser) return res.status(404).json({ error: 'User not found' });
@@ -75,6 +81,7 @@ export const requestMoney = async (req: AuthRequest, res: Response) => {
 
   res.json({ message: `Request of $${amount} sent to ${recipientUsername}` });
 };
+
 
 export const getPendingRequests = async (req: AuthRequest, res: Response) => {
   const userId = req.userId;

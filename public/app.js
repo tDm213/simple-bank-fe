@@ -1,137 +1,265 @@
+const API_BASE = 'http://localhost:3001/api'; // Backend API URL
+
+// ====== Check token ======
 const token = localStorage.getItem('token');
-if (!token) location.href = '/';
-
-const headers = {
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${token}`
-};
-
-async function getMe() {
-  const res = await fetch('/user/me', { headers });
-  const data = await res.json();
-  document.getElementById('userInfo').innerHTML =
-    `<b>User:</b> ${data.username} | <b>Balance:</b> $${data.balance.toFixed(2)}`;
+// Only redirect if token is missing AND not already on login page
+if (!token && !location.pathname.endsWith('index.html')) {
+  location.href = '/index.html';
 }
 
-async function sendMoney(e) {
-  e.preventDefault();
-  const to = document.getElementById('sendTo').value;
-  const amount = parseFloat(document.getElementById('sendAmount').value);
-  await fetch('/transaction/send', {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ recipientUsername: to, amount }),
+// ====== Logout ======
+const logoutBtn = document.getElementById('logout-btn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('token');
+    location.href = '/index.html';
   });
-  e.target.reset();
-  loadEverything();
 }
 
-async function requestMoney(e) {
-  e.preventDefault();
-  const to = document.getElementById('requestFrom').value;
-  const amount = parseFloat(document.getElementById('requestAmount').value);
-  await fetch('/transaction/request', {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ recipientUsername: to, amount }),
-  });
-  e.target.reset();
-  loadEverything();
+// ====== Toast helper ======
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
 }
 
-async function getRequests() {
-  const res = await fetch('/transaction/requests', { headers });
-  const data = await res.json();
-  const list = document.getElementById('pendingRequests');
-  const emptyMsg = document.getElementById('noPending');
-  list.innerHTML = '';
-
-  if (data.length === 0) {
-    emptyMsg.classList.remove('hidden');
-    return;
-  } else {
-    emptyMsg.classList.add('hidden');
+// ====== Fetch user info ======
+async function loadUser() {
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/user/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (res.ok) {
+      const userInfo = document.getElementById('userInfo');
+      if (userInfo) userInfo.textContent = `👤 ${data.username} | 💰 $${data.balance}`;
+    } else {
+      localStorage.removeItem('token');
+      location.href = '/index.html';
+    }
+  } catch (err) {
+    console.error(err);
+    localStorage.removeItem('token');
+    location.href = '/index.html';
   }
-
-  data.forEach(req => {
-    const li = document.createElement('li');
-    li.textContent = `${req.fromUser.username} requests $${req.amount}`;
-
-    const approveBtn = document.createElement('button');
-    approveBtn.id = 'approveBtn'
-    approveBtn.textContent = 'Approve';
-    approveBtn.onclick = async () => {
-      await fetch('/transaction/request/approve', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ requestId: req.id }),
-      });
-      loadEverything();
-    };
-
-    const rejectBtn = document.createElement('button');
-    rejectBtn.id = 'rejectBtn'
-    rejectBtn.textContent = 'Reject';
-    rejectBtn.onclick = async () => {
-      await fetch('/transaction/request/reject', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ requestId: req.id }),
-      });
-      loadEverything();
-    };
-
-    li.appendChild(approveBtn);
-    li.appendChild(rejectBtn);
-    list.appendChild(li);
-  });
 }
 
-async function getHistory() {
-  const res = await fetch('/transaction/history', { headers });
-  const data = await res.json();
-  const list = document.getElementById('history');
-  list.innerHTML = '';
-  data.forEach(tx => {
-    const li = document.createElement('li');
-    const direction = tx.type === 'send'
-      ? `Sent $${tx.amount} to ${tx.to}`
-      : `Requested $${tx.amount} from ${tx.to}`;
-    const result = tx.status === 'completed' ? '✔' : tx.status === 'rejected' ? '✘' : '⏳';
-    li.textContent = `${result} ${direction}`;
-    list.appendChild(li);
-  });
-}
-
-function logout() {
-  localStorage.removeItem('token');
-  location.href = '/';
-}
-
-function loadEverything() {
-  getMe();
-  getRequests();
-  getHistory();
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('sendForm')?.addEventListener('submit', sendMoney);
-  document.getElementById('requestForm')?.addEventListener('submit', requestMoney);
-
-  // tab switching
-  document.getElementById('tabSend')?.addEventListener('click', () => {
+// ====== Tab switching ======
+const tabSend = document.getElementById('tabSend');
+const tabRequest = document.getElementById('tabRequest');
+if (tabSend && tabRequest) {
+  tabSend.addEventListener('click', () => {
     document.getElementById('sendTab').classList.remove('hidden');
     document.getElementById('requestTab').classList.add('hidden');
-    document.getElementById('tabSend').classList.add('active');
-    document.getElementById('tabRequest').classList.remove('active');
+    tabSend.classList.add('active');
+    tabRequest.classList.remove('active');
   });
-
-  document.getElementById('tabRequest')?.addEventListener('click', () => {
+  tabRequest.addEventListener('click', () => {
     document.getElementById('sendTab').classList.add('hidden');
     document.getElementById('requestTab').classList.remove('hidden');
-    document.getElementById('tabSend').classList.remove('active');
-    document.getElementById('tabRequest').classList.add('active');
+    tabSend.classList.remove('active');
+    tabRequest.classList.add('active');
   });
+}
 
-  loadEverything();
-});
+// ====== Fetch pending requests ======
+async function loadPending() {
+  if (!token) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/transactions/requests`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+
+    const list = document.getElementById('pendingRequests');
+    const noPending = document.getElementById('noPending');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    if (data.length === 0) {
+      noPending.classList.remove('hidden');
+    } else {
+      noPending.classList.add('hidden');
+      data.forEach((req) => {
+        const li = document.createElement('li');
+        const text = document.createElement('span');
+        text.textContent = `${req.fromUser.username} → You: $${req.amount}`;
+        li.appendChild(text);
+
+        const approveBtn = document.createElement('button');
+        approveBtn.textContent = 'Approve';
+        approveBtn.style.marginLeft = '10px';
+        approveBtn.onclick = async () => await handleApprove(req.id);
+
+        const rejectBtn = document.createElement('button');
+        rejectBtn.textContent = 'Reject';
+        rejectBtn.style.marginLeft = '5px';
+        rejectBtn.onclick = async () => await handleReject(req.id);
+
+        li.appendChild(approveBtn);
+        li.appendChild(rejectBtn);
+        list.appendChild(li);
+      });
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ====== Fetch transaction history ======
+async function loadHistory() {
+  if (!token) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/transactions/history`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    const list = document.getElementById('history');
+    if (!list) return;
+    list.innerHTML = '';
+
+    data.forEach(tx => {
+      const li = document.createElement('li');
+      const status = tx.status === 'pending'
+        ? '⏳ Pending request'
+        : tx.status === 'rejected'
+          ? '❌ Rejected'
+          : '✅ Completed';
+      li.textContent = `${new Date(tx.date || tx.timestamp).toLocaleString()}: ${tx.from} → ${tx.to} $${tx.amount} (${status})`;
+      list.appendChild(li);
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ====== Action handlers ======
+async function handleSend(recipientUsername, amount) {
+  try {
+    const res = await fetch(`${API_BASE}/transactions/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ recipientUsername, amount })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast(data.message, 'success');
+      loadHistory();
+      loadUser();
+    } else {
+      showToast(data.error, 'error');
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function handleRequest(recipientUsername, amount) {
+  try {
+    const res = await fetch(`${API_BASE}/transactions/request`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ recipientUsername, amount })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast(data.message, 'success');
+      loadPending();
+      loadHistory(); // ✅ ensure history updates
+    } else {
+      showToast(data.error, 'error');
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function handleApprove(requestId) {
+  try {
+    const res = await fetch(`${API_BASE}/transactions/request/approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ requestId })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast(data.message, 'success');
+      loadPending();
+      loadHistory();
+      loadUser();
+    } else {
+      showToast(data.error, 'error');
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function handleReject(requestId) {
+  try {
+    const res = await fetch(`${API_BASE}/transactions/request/reject`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ requestId })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showToast(data.message, 'success');
+      loadPending();
+      loadHistory(); // ✅ update history after rejection
+    } else {
+      showToast(data.error, 'error');
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ====== Form submissions ======
+const sendForm = document.getElementById('sendForm');
+if (sendForm) {
+  sendForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const recipient = document.getElementById('sendTo').value;
+    const amount = parseFloat(document.getElementById('sendAmount').value);
+    handleSend(recipient, amount);
+  });
+}
+
+const requestForm = document.getElementById('requestForm');
+if (requestForm) {
+  requestForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const recipient = document.getElementById('requestFrom').value;
+    const amount = parseFloat(document.getElementById('requestAmount').value);
+    handleRequest(recipient, amount);
+  });
+}
+
+// ====== Auto-refresh ======
+function startAutoRefresh() {
+  setInterval(() => {
+    loadPending();
+    loadHistory();
+  }, 5000);
+}
+
+// ====== Init ======
+if (token) {
+  loadUser();
+  loadPending();
+  loadHistory();
+  startAutoRefresh();
+}

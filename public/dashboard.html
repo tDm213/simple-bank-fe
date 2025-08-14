@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>Banking Dashboard</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
   <section>
     <div class="dashboard-header">
       <h1>🏦 Dashboard</h1>
       <div class="user-header">
         <div id="userInfo"></div>
-        <button id="logout-btn" class="logout-btn" onclick="logout()">🚪 Logout</button>
+        <button id="logout-btn" class="logout-btn">🚪 Logout</button>
       </div>
     </div>
 
@@ -28,7 +26,7 @@
             <form id="sendForm">
               To: <input type="text" id="sendTo" required />
               Amount: <input type="number" id="sendAmount" required />
-              <button id="SendAmountButton" type="submit">Send</button>
+              <button type="submit">Send</button>
             </form>
           </div>
 
@@ -36,7 +34,7 @@
             <form id="requestForm">
               From: <input type="text" id="requestFrom" required />
               Amount: <input type="number" id="requestAmount" required />
-              <button id="RequestAmountButton" type="submit">Request</button>
+              <button type="submit">Request</button>
             </form>
           </div>
         </div>
@@ -55,7 +53,9 @@
     </div>
   </section>
 
+  <!-- Toast container -->
+  <div id="toast-container" class="toast-container"></div>
+
   <script src="app.js"></script>
 </body>
-
 </html>

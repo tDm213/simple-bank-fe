@@ -24,6 +24,6 @@ model Transaction {
   toUserId   Int?
   amount     Float
   timestamp  DateTime @default(now())
-  status     String   // 'pending', 'completed', 'rejected'
-  type       String   // 'send', 'request'
+  status     String
+  type       String
 }

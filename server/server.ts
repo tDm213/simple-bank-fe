@@ -1,26 +1,41 @@
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
 import dotenv from 'dotenv';
-
 import authRoutes from './routes/auth';
 import transactionRoutes from './routes/transaction';
 import userRoutes from './routes/user';
 import { authMiddleware } from './middleware/auth';
 
 dotenv.config();
-
 const app = express();
-app.use(cors());
+
+// Logger
+app.use((req, res, next) => {
+    console.log(`📩 ${req.method} ${req.url}`);
+    console.log('Headers:', req.headers);
+    if (req.method !== 'GET') console.log('Body:', req.body);
+    next();
+});
+
+// CORS
+app.use(cors({
+    origin: 'http://localhost:3000',
+    methods: ['GET','POST','PUT','DELETE'],
+    allowedHeaders: ['Content-Type','Authorization'],
+    credentials: true
+}));
+
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, '../public')));
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/transactions', authMiddleware, transactionRoutes);
+app.use('/api/user', authMiddleware, userRoutes);
 
-app.use('/auth', authRoutes);
-app.use('/transaction', authMiddleware, transactionRoutes);
-app.use('/user', authMiddleware, userRoutes);
+// Optional: serve frontend (if you want)
+// app.use(express.static(path.join(__dirname, '../public')));
 
-// Start server
-app.listen(3000, () => {
-  console.log('✅ Server running at http://localhost:3000');
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+    console.log(`✅ Backend running at http://localhost:${PORT}`);
 });
