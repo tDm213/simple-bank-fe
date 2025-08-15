@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Banking App - Login</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <section>
+      <h1 class="auth-title">🏦 Login / Signup</h1>
+
+      <div class="tab-container" style="max-width: 400px; margin: 0 auto;">
+        <div class="tab-buttons">
+          <button type="button" id="tabLogin" class="active">🔐 Login</button>
+          <button type="button" id="tabSignup">📝 Signup</button>
+        </div>
+
+        <div id="loginTab" class="tab-content">
+          <form id="loginForm">
+            <input type="text" id="loginUsername" placeholder="Username" required />
+            <small id="loginUserError" class="error-message hidden"></small>
+
+            <input type="password" id="loginPassword" placeholder="Password" required />
+            <small id="loginPassError" class="error-message hidden"></small>
+
+            <button id="loginButton" type="submit">Login</button>
+          </form>
+        </div>
+
+        <div id="signupTab" class="tab-content hidden">
+          <form id="signupForm">
+            <input type="text" id="signupUsername" placeholder="Username" required />
+            <small id="signupUserError" class="error-message hidden"></small>
+
+            <input type="password" id="signupPassword" placeholder="Password" required />
+            <small id="signupPassError" class="error-message hidden"></small>
+
+            <button id="signupButton" type="submit">Signup</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
