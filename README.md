@@ -10,9 +10,7 @@ A lightweight banking app frontend built with **HTML, CSS, and JavaScript**, des
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Project Structure](#project-structure)
 - [API Integration](#api-integration)
-- [Contributing](#contributing)
 - [License](#license)
 
 ---
@@ -20,7 +18,7 @@ A lightweight banking app frontend built with **HTML, CSS, and JavaScript**, des
 ## Demo
 
 💻 This project can be run locally and communicates with a backend server at `http://localhost:3001/api`.  
-
+Runs on the `http://localhost:3000`
 ---
 
 ## Features
@@ -43,6 +41,7 @@ A lightweight banking app frontend built with **HTML, CSS, and JavaScript**, des
 ```bash
 git clone https://github.com/yourusername/simple-bank-fe.git
 cd simple-bank-fe
+npm install
 ```
 
 Make sure your backend is running (default: http://localhost:3001/api).
